@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Celular 2 - Chat API NestJS</title>
+  <title>Simulador de Chat Mobile - Estilo Instagram Direct</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Socket.IO Client -->
@@ -19,26 +19,29 @@
 <body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col antialiased">
 
   <!-- Header Superior -->
-  <header class="bg-indigo-700 text-white px-6 py-3 shadow flex items-center justify-between flex-wrap gap-3">
+  <header class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white px-6 py-3 shadow flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
+      <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xl shadow-inner">
         📱
       </div>
       <div>
-        <h1 class="font-bold text-lg leading-tight">Simulador de Celular (Computador)</h1>
-        <p class="text-xs text-indigo-200">Simule o 2º dispositivo interagindo com o seu celular físico</p>
+        <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+          Simulador de Celular (Mobile Client)
+          <span class="bg-white/20 text-xs px-2 py-0.5 rounded-full font-normal">Direct @username</span>
+        </h1>
+        <p class="text-xs text-indigo-100">Teste o fluxo de busca por @, envio de solicitações, visualização e aceite em tempo real</p>
       </div>
     </div>
 
     <!-- Controles de Conexão -->
     <div class="flex items-center space-x-3 text-sm">
-      <div class="flex items-center bg-indigo-800/60 rounded px-2.5 py-1">
-        <label class="text-xs text-indigo-200 mr-2">API URL:</label>
-        <input id="apiUrlInput" type="text" value="http://localhost:3000" class="bg-indigo-950/70 text-white text-xs px-2 py-0.5 rounded border border-indigo-500/50 outline-none w-48 focus:border-indigo-300">
+      <div class="flex items-center bg-black/20 rounded-lg px-2.5 py-1 backdrop-blur">
+        <label class="text-xs text-indigo-100 mr-2">API URL:</label>
+        <input id="apiUrlInput" type="text" value="http://localhost:3000" class="bg-black/30 text-white text-xs px-2 py-1 rounded border border-white/20 outline-none w-48 focus:border-white">
       </div>
 
       <div class="flex items-center space-x-2">
-        <span id="socketBadge" class="flex items-center text-xs font-semibold px-2.5 py-1 rounded bg-rose-500 text-white">
+        <span id="socketBadge" class="flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-rose-500 text-white shadow-sm">
           <span class="w-2 h-2 rounded-full bg-white mr-1.5 animate-pulse"></span>
           Socket Desconectado
         </span>
@@ -49,28 +52,35 @@
   <!-- Corpo Principal -->
   <div class="flex-1 flex overflow-hidden p-4 gap-4 max-w-7xl w-full mx-auto">
     
-    <!-- Painel Lateral: Usuário, Contatos e Conversas -->
-    <div class="w-80 bg-white rounded-xl shadow border border-slate-200 flex flex-col overflow-hidden">
+    <!-- Painel Lateral: Usuário, Busca, Abas de Conversas e Solicitações -->
+    <div class="w-84 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
       
       <!-- Card do Usuário Ativo -->
-      <div class="p-4 border-b border-slate-100 bg-slate-50">
+      <div class="p-3.5 border-b border-slate-100 bg-slate-50">
         <div id="loggedOutSection">
-          <h2 class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">Identidade no Computador</h2>
-          <div class="flex flex-col gap-2">
-            <button onclick="quickAuth('mariana@teste.com', 'Mariana Souza')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 px-3 rounded shadow transition">
-              Entrar como Mariana (mariana@teste.com)
+          <h2 class="text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">Entrar no Simulador</h2>
+          <div class="flex flex-col gap-1.5">
+            <button onclick="quickAuth('mariana', 'mariana@teste.com', 'Mariana Souza')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition flex items-center justify-between">
+              <span>Mariana Souza</span>
+              <span class="text-[11px] bg-indigo-700 px-1.5 py-0.5 rounded">@mariana</span>
             </button>
-            <button onclick="quickAuth('carlos@teste.com', 'Carlos Silva')" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium py-1.5 px-3 rounded transition">
-              Entrar como Carlos (carlos@teste.com)
+            <button onclick="quickAuth('carlos', 'carlos@teste.com', 'Carlos Silva')" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition flex items-center justify-between">
+              <span>Carlos Silva</span>
+              <span class="text-[11px] bg-slate-700 px-1.5 py-0.5 rounded">@carlos</span>
+            </button>
+            <button onclick="quickAuth('felipe', 'felipe@teste.com', 'Felipe Carvalho')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition flex items-center justify-between">
+              <span>Felipe Carvalho</span>
+              <span class="text-[11px] bg-purple-800 px-1.5 py-0.5 rounded">@felipe</span>
             </button>
             
             <details class="text-xs text-slate-600 mt-1">
-              <summary class="cursor-pointer font-medium hover:text-indigo-600">Login com outro usuário</summary>
-              <form onsubmit="handleCustomLogin(event)" class="mt-2 space-y-2">
-                <input id="customName" type="text" placeholder="Nome (ex: João)" class="w-full text-xs p-1.5 border rounded">
+              <summary class="cursor-pointer font-medium hover:text-indigo-600 text-center py-1">Cadastrar outro usuário</summary>
+              <form onsubmit="handleCustomLogin(event)" class="mt-2 space-y-2 bg-white p-2.5 rounded-lg border border-slate-200">
+                <input id="customUsername" type="text" placeholder="@username (ex: joao_dev)" required class="w-full text-xs p-1.5 border rounded">
+                <input id="customName" type="text" placeholder="Nome completo" required class="w-full text-xs p-1.5 border rounded">
                 <input id="customEmail" type="email" placeholder="Email" required class="w-full text-xs p-1.5 border rounded">
                 <input id="customPassword" type="password" placeholder="Senha" value="senhaSegura123" required class="w-full text-xs p-1.5 border rounded">
-                <button type="submit" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-1 rounded">Entrar / Cadastrar</button>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 rounded text-xs shadow">Entrar / Cadastrar</button>
               </form>
             </details>
           </div>
@@ -78,75 +88,115 @@
 
         <div id="loggedInSection" class="hidden">
           <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <div id="userAvatar" class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+            <div class="flex items-center space-x-2.5">
+              <div id="userAvatar" class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow">
                 M
               </div>
               <div class="overflow-hidden">
-                <div id="userName" class="font-bold text-sm text-slate-800 truncate">Mariana Souza</div>
-                <div id="userEmail" class="text-xs text-slate-500 truncate">mariana@teste.com</div>
+                <div class="flex items-center gap-1.5">
+                  <span id="userName" class="font-bold text-sm text-slate-800 truncate">Mariana Souza</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span id="userUsername" class="text-xs font-semibold text-indigo-600 truncate">@mariana</span>
+                  <span class="text-slate-300">•</span>
+                  <span id="userEmail" class="text-[11px] text-slate-400 truncate">mariana@teste.com</span>
+                </div>
               </div>
             </div>
-            <button onclick="logout()" title="Trocar usuário" class="text-slate-400 hover:text-rose-500 text-xs font-semibold p-1">
+            <button onclick="logout()" title="Trocar usuário" class="text-slate-400 hover:text-rose-500 text-xs font-semibold p-1.5 rounded hover:bg-rose-50 transition">
               Sair
             </button>
           </div>
-          <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
-            <span>ID do Usuário: <b id="userIdDisplay">2</b></span>
-            <button onclick="copyToken()" class="underline hover:text-indigo-600">Copiar JWT</button>
+          <div class="mt-2.5 pt-2 border-t border-slate-200 text-[10px] text-slate-400 flex items-center justify-between">
+            <span>ID do Usuário: <b id="userIdDisplay" class="text-slate-600">2</b></span>
+            <button onclick="copyToken()" class="text-indigo-600 hover:text-indigo-800 font-medium">Copiar Token JWT</button>
           </div>
         </div>
       </div>
 
-      <!-- Abas: Conversas / Contatos -->
+      <!-- Barra de Busca por @username (Estilo Instagram) -->
+      <div id="searchSection" class="p-2.5 border-b border-slate-100 bg-white relative">
+        <div class="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200 focus-within:border-indigo-500 focus-within:bg-white transition">
+          <span class="text-slate-400 text-xs mr-2">🔍</span>
+          <input 
+            id="searchInput" 
+            type="text" 
+            placeholder="Buscar @username ou nome..." 
+            oninput="handleSearch(this.value)"
+            class="bg-transparent text-xs w-full outline-none text-slate-800"
+          >
+          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden text-slate-400 hover:text-slate-600 text-xs font-bold">×</button>
+        </div>
+
+        <!-- Resultados da Busca (Dropdown Flutuante) -->
+        <div id="searchResultsDropdown" class="hidden absolute left-2 right-2 top-12 bg-white rounded-xl shadow-xl border border-slate-200 z-50 max-h-72 overflow-y-auto divide-y divide-slate-100">
+        </div>
+      </div>
+
+      <!-- Abas: Conversas / Solicitações / Contatos -->
       <div class="flex border-b border-slate-100 bg-white">
-        <button id="tabConversationsBtn" onclick="switchTab('conversations')" class="flex-1 py-2 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center">
+        <button id="tabConversationsBtn" onclick="switchTab('conversations')" class="flex-1 py-2.5 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center transition">
           Conversas (<span id="conversationsCount">0</span>)
         </button>
-        <button id="tabContactsBtn" onclick="switchTab('contacts')" class="flex-1 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center">
+        <button id="tabRequestsBtn" onclick="switchTab('requests')" class="flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center transition flex items-center justify-center gap-1">
+          <span>Pedidos</span>
+          <span id="requestsBadge" class="hidden bg-pink-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+        <button id="tabContactsBtn" onclick="switchTab('contacts')" class="flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center transition">
           Contatos (<span id="contactsCount">0</span>)
         </button>
       </div>
 
-      <!-- Lista de Conversas -->
+      <!-- Lista de Conversas Principais (ACCEPTED) -->
       <div id="conversationsList" class="flex-1 overflow-y-auto divide-y divide-slate-100">
         <div class="p-6 text-center text-slate-400 text-xs">
           Faça login para ver as conversas.
         </div>
       </div>
 
-      <!-- Lista de Contatos -->
-      <div id="contactsList" class="hidden flex-1 overflow-y-auto divide-y divide-slate-100">
+      <!-- Lista de Solicitações de Conversa (PENDING) -->
+      <div id="requestsList" class="hidden flex-1 overflow-y-auto divide-y divide-slate-100">
         <div class="p-6 text-center text-slate-400 text-xs">
-          Nenhum contato carregado.
+          Nenhuma solicitação pendente.
         </div>
       </div>
 
-      <!-- Botão Recarregar -->
-      <div class="p-2 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
-        <span class="text-[11px] text-slate-400">Atualização em tempo real</span>
-        <button onclick="loadUserData()" class="text-indigo-600 hover:text-indigo-800 font-medium">
-          🔄 Atualizar
+      <!-- Lista de Contatos -->
+      <div id="contactsList" class="hidden flex-1 overflow-y-auto divide-y divide-slate-100">
+        <div class="p-6 text-center text-slate-400 text-xs">
+          Nenhum contato encontrado.
+        </div>
+      </div>
+
+      <!-- Rodapé da barra lateral -->
+      <div class="p-2.5 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
+        <span class="text-[11px] text-slate-400">WebSocket Ativo</span>
+        <button onclick="loadUserData()" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+          🔄 <span>Atualizar</span>
         </button>
       </div>
     </div>
 
     <!-- Área Principal de Chat -->
-    <div class="flex-1 bg-white rounded-xl shadow border border-slate-200 flex flex-col overflow-hidden">
+    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden relative">
       
       <!-- Cabeçalho do Chat -->
-      <div id="chatHeader" class="p-3.5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
+      <div id="chatHeader" class="p-3.5 border-b border-slate-100 bg-slate-50/90 backdrop-blur flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div id="chatContactAvatar" class="w-10 h-10 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-sm">
+          <div id="chatContactAvatar" class="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-300 text-slate-700 flex items-center justify-center font-bold text-sm shadow-sm">
             ?
           </div>
           <div>
-            <div id="chatContactName" class="font-bold text-sm text-slate-800">Selecione uma conversa</div>
+            <div class="flex items-center gap-2">
+              <span id="chatContactName" class="font-bold text-sm text-slate-800">Selecione uma conversa</span>
+              <span id="chatContactUsername" class="text-xs font-semibold text-indigo-600"></span>
+            </div>
             <div id="chatStatusText" class="text-xs text-slate-400">Aguardando seleção...</div>
           </div>
         </div>
 
         <div class="flex items-center space-x-2 text-xs">
+          <span id="requestStatusBadge" class="hidden px-2.5 py-1 rounded-full text-[11px] font-semibold"></span>
           <span id="roomBadge" class="hidden px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono text-[11px] border border-indigo-200">
             Sala #<span id="currentRoomId">-</span>
           </span>
@@ -157,8 +207,27 @@
       <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
         <div class="h-full flex flex-col items-center justify-center text-slate-400 text-center p-6">
           <div class="text-4xl mb-2">💬</div>
-          <div class="text-sm font-semibold text-slate-600">Simulador de Conversa</div>
-          <p class="text-xs max-w-xs mt-1">Conecte-se com um usuário e selecione o contato do seu celular físico para iniciar a troca de mensagens.</p>
+          <div class="text-sm font-semibold text-slate-600">Simulador de Conversa Mobile</div>
+          <p class="text-xs max-w-xs mt-1 text-slate-400">Busque um usuário pelo @username no topo ou selecione uma conversa para trocar mensagens.</p>
+        </div>
+      </div>
+
+      <!-- Banner de Ação para Solicitação Pendente (Estilo Instagram Direct) -->
+      <div id="requestActionBanner" class="hidden p-3.5 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-t border-indigo-100 flex flex-col gap-2">
+        <div class="text-xs text-slate-700 flex items-center justify-between">
+          <span><b id="bannerSenderName">Usuário</b> enviou uma solicitação de conversa para você.</span>
+          <span class="text-[11px] text-slate-400">Ele já visualizou que você abriu a mensagem.</span>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <button onclick="acceptCurrentRequest()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+            <span>🟢</span> <span>Aceitar Conversa</span>
+          </button>
+          <button onclick="rejectCurrentRequest()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold py-2 px-3 rounded-xl transition">
+            Recusar
+          </button>
+          <button onclick="blockCurrentContact()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-2 px-3 rounded-xl border border-rose-200 transition">
+            Bloquear
+          </button>
         </div>
       </div>
 
@@ -195,25 +264,55 @@
     </div>
 
     <!-- Painel de Logs / Depurador de Eventos WebSocket -->
-    <div class="w-80 bg-slate-900 text-slate-200 rounded-xl shadow border border-slate-800 flex flex-col overflow-hidden text-xs">
+    <div class="w-80 bg-slate-900 text-slate-200 rounded-2xl shadow-sm border border-slate-800 flex flex-col overflow-hidden text-xs">
       <div class="p-3 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <span class="text-emerald-400 font-mono font-bold">&gt;_</span>
-          <span class="font-bold text-xs text-white">Log de Eventos Socket.IO</span>
+          <span class="font-bold text-xs text-white">Eventos em Tempo Real</span>
         </div>
         <button onclick="clearLogs()" class="text-[10px] text-slate-400 hover:text-white">Limpar</button>
       </div>
       
       <div id="logsContainer" class="flex-1 overflow-y-auto p-3 font-mono text-[11px] space-y-2 bg-slate-950/60">
-        <div class="text-slate-500 italic">Logs dos eventos em tempo real aparecerão aqui...</div>
+        <div class="text-slate-500 italic">Logs dos eventos WebSocket aparecerão aqui...</div>
       </div>
 
-      <div class="p-2 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-400 flex justify-between">
-        <span>Eventos: <b id="logCount">0</b></span>
-        <span>IP: <code class="text-slate-300">192.168.1.11:3000</code></span>
+      <div class="p-2.5 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-400 flex justify-between items-center">
+        <span>Eventos: <b id="logCount" class="text-emerald-400">0</b></span>
+        <span class="bg-slate-800 px-2 py-0.5 rounded text-slate-300">NestJS Socket.IO</span>
       </div>
     </div>
 
+  </div>
+
+  <!-- Modal para Enviar Solicitação de Conversa com Mensagem Inicial -->
+  <div id="requestModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden p-5 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-base text-slate-800">Enviar Mensagem Direta</h3>
+        <button onclick="closeRequestModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
+      </div>
+      <div class="flex items-center space-x-3 p-3 bg-indigo-50/60 rounded-xl mb-3 border border-indigo-100">
+        <div id="modalRecipientAvatar" class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+          ?
+        </div>
+        <div>
+          <div id="modalRecipientName" class="font-bold text-sm text-slate-800">Nome</div>
+          <div id="modalRecipientUsername" class="text-xs font-semibold text-indigo-600">@username</div>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 mb-2">Esta mensagem será enviada como uma <b>solicitação de conversa</b>. O destinatário poderá ler e aceitar para liberar o chat.</p>
+      <textarea 
+        id="modalMessageContent" 
+        rows="3" 
+        placeholder="Digite sua mensagem inicial..." 
+        class="w-full text-xs p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 border-slate-200 resize-none mb-3"
+      ></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeRequestModal()" class="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+        <button onclick="submitConversationRequest()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow transition">Enviar Solicitação</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -226,12 +325,14 @@
     let typingStatus = false;
     let contacts = [];
     let conversations = [];
+    let pendingRequests = [];
+    let targetUserForRequest = null;
+    let searchDebounceTimer = null;
 
     const getApiUrl = () => document.getElementById('apiUrlInput').value.replace(/\/+$/, '');
 
     // Inicialização
     window.addEventListener('DOMContentLoaded', () => {
-      // Verificar se há token salvo no localStorage
       const savedUser = localStorage.getItem('sim_user');
       const savedToken = localStorage.getItem('sim_token');
       if (savedUser && savedToken) {
@@ -243,7 +344,7 @@
       }
     });
 
-    // Logger
+    // Logger de eventos
     function logEvent(type, name, data) {
       const logs = document.getElementById('logsContainer');
       const time = new Date().toLocaleTimeString();
@@ -271,17 +372,16 @@
       document.getElementById('logCount').innerText = '0';
     }
 
-    // Autenticação Rápida
-    async function quickAuth(email, name) {
+    // Autenticação
+    async function quickAuth(username, email, name) {
       try {
         const apiUrl = getApiUrl();
-        logEvent('SYS', 'AUTH', `Tentando autenticar como ${email}...`);
+        logEvent('SYS', 'AUTH', `Autenticando como @${username}...`);
 
-        // Tenta registrar primeiro, se falhar tenta login
         let res = await fetch(`${apiUrl}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password: 'senhaSegura123' })
+          body: JSON.stringify({ username, name, email, password: 'senhaSegura123' })
         });
 
         if (!res.ok && res.status === 409) {
@@ -314,10 +414,11 @@
 
     async function handleCustomLogin(e) {
       e.preventDefault();
-      const name = document.getElementById('customName').value || 'Usuário';
-      const email = document.getElementById('customEmail').value;
+      const username = document.getElementById('customUsername').value.replace(/^@/, '').toLowerCase().trim();
+      const name = document.getElementById('customName').value.trim();
+      const email = document.getElementById('customEmail').value.trim();
       const password = document.getElementById('customPassword').value;
-      quickAuth(email, name);
+      quickAuth(username, email, name);
     }
 
     function logout() {
@@ -336,6 +437,7 @@
         </div>
       `;
       document.getElementById('conversationsList').innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Faça login para ver as conversas.</div>';
+      document.getElementById('requestsList').innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhuma solicitação.</div>';
     }
 
     function updateUserUI() {
@@ -345,6 +447,7 @@
         loggedOut.classList.add('hidden');
         loggedIn.classList.remove('hidden');
         document.getElementById('userName').innerText = currentUser.name;
+        document.getElementById('userUsername').innerText = `@${currentUser.username || 'usuario'}`;
         document.getElementById('userEmail').innerText = currentUser.email;
         document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
         document.getElementById('userIdDisplay').innerText = currentUser.id;
@@ -357,7 +460,7 @@
     function copyToken() {
       if (currentToken) {
         navigator.clipboard.writeText(currentToken);
-        alert('Token JWT copiado para a área de transferência!');
+        alert('Token JWT copiado com sucesso!');
       }
     }
 
@@ -368,7 +471,7 @@
       }
 
       const apiUrl = getApiUrl();
-      logEvent('SYS', 'WS_CONNECTING', `Conectando WebSocket em ${apiUrl}...`);
+      logEvent('SYS', 'WS_CONNECTING', `Conectando Socket.IO em ${apiUrl}...`);
 
       socket = io(apiUrl, {
         auth: {
@@ -379,11 +482,10 @@
 
       socket.on('connect', () => {
         const badge = document.getElementById('socketBadge');
-        badge.className = 'flex items-center text-xs font-semibold px-2.5 py-1 rounded bg-emerald-600 text-white';
+        badge.className = 'flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-600 text-white shadow-sm';
         badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-white mr-1.5"></span> Socket Conectado';
-        logEvent('IN', 'CONNECTED', { socketId: socket.id });
+        logEvent('IN', 'CONNECTED', { socketId: socket.id, userId: currentUser.id });
 
-        // Se já tinha conversa ativa, re-entrar na sala
         if (currentConversation) {
           joinRoom(currentConversation.id);
         }
@@ -391,7 +493,7 @@
 
       socket.on('disconnect', () => {
         const badge = document.getElementById('socketBadge');
-        badge.className = 'flex items-center text-xs font-semibold px-2.5 py-1 rounded bg-rose-500 text-white';
+        badge.className = 'flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-rose-500 text-white shadow-sm';
         badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-white mr-1.5 animate-pulse"></span> Socket Desconectado';
         logEvent('SYS', 'DISCONNECTED', 'Socket desconectado do servidor.');
       });
@@ -400,18 +502,43 @@
       socket.on('new_message', (message) => {
         logEvent('IN', 'new_message', message);
         
-        // Se a mensagem pertence à conversa aberta no momento
         if (currentConversation && message.conversationId === currentConversation.id) {
           appendMessageUI(message);
-          
-          // Se recebemos de outra pessoa, marcar como lida automaticamente
           if (message.senderId !== currentUser.id) {
             markMessageAsRead(message.id);
           }
         }
-        
-        // Atualiza a lista de conversas
         loadConversations();
+      });
+
+      // Evento: Nova Solicitação de Conversa
+      socket.on('new_message_request', (data) => {
+        logEvent('IN', 'new_message_request', data);
+        loadPendingRequests();
+        const senderTag = data?.sender?.username ? `@${data.sender.username}` : 'um usuário';
+        alert(`📬 Nova solicitação de conversa de ${senderTag}!`);
+      });
+
+      // Evento: Solicitação Aceita
+      socket.on('conversation_accepted', (data) => {
+        logEvent('IN', 'conversation_accepted', data);
+        loadConversations();
+        loadPendingRequests();
+        if (currentConversation && currentConversation.id === data.conversationId) {
+          currentConversation.status = 'ACCEPTED';
+          setupChatMode('ACCEPTED');
+        }
+      });
+
+      // Evento: Solicitação Recusada
+      socket.on('conversation_rejected', (data) => {
+        logEvent('IN', 'conversation_rejected', data);
+        loadConversations();
+        loadPendingRequests();
+        if (currentConversation && currentConversation.id === data.conversationId) {
+          currentConversation.status = 'REJECTED';
+          setupChatMode('REJECTED');
+        }
       });
 
       // Evento: Status da Mensagem (DELIVERED / READ)
@@ -444,7 +571,7 @@
     // Carregar Dados da API REST
     async function loadUserData() {
       if (!currentToken) return;
-      await Promise.all([loadContacts(), loadConversations()]);
+      await Promise.all([loadContacts(), loadConversations(), loadPendingRequests()]);
     }
 
     async function loadContacts() {
@@ -475,35 +602,32 @@
       }
     }
 
-    function renderContacts() {
-      const container = document.getElementById('contactsList');
-      if (!contacts || contacts.length === 0) {
-        container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhum contato encontrado. Cadastre o usuário do seu celular primeiro!</div>';
-        return;
+    async function loadPendingRequests() {
+      try {
+        const apiUrl = getApiUrl();
+        const res = await fetch(`${apiUrl}/api/conversations/requests`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        pendingRequests = data.requests || [];
+        
+        const badge = document.getElementById('requestsBadge');
+        if (data.totalPending > 0) {
+          badge.innerText = data.totalPending;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+        renderPendingRequests();
+      } catch (e) {
+        logEvent('SYS', 'ERROR_REQUESTS', e.message);
       }
-
-      container.innerHTML = contacts.map(c => `
-        <div onclick="startConversationWith(${c.id})" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
-              ${c.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <div class="text-xs font-bold text-slate-800">${c.name}</div>
-              <div class="text-[11px] text-slate-400">${c.email}</div>
-            </div>
-          </div>
-          <button class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded font-medium hover:bg-indigo-100">
-            Conversar
-          </button>
-        </div>
-      `).join('');
     }
 
     function renderConversations() {
       const container = document.getElementById('conversationsList');
       if (!conversations || conversations.length === 0) {
-        container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhuma conversa ainda. Abra a aba "Contatos" e inicie uma conversa com seu celular!</div>';
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhuma conversa ativa ainda. Busque um @username no topo para iniciar!</div>';
         return;
       }
 
@@ -511,13 +635,16 @@
         const isSelected = currentConversation && currentConversation.id === conv.id;
         const lastMsg = conv.lastMessage ? conv.lastMessage.content : 'Nenhuma mensagem';
         return `
-          <div onclick="selectConversation(${conv.id})" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition ${isSelected ? 'bg-indigo-50/70 border-l-4 border-indigo-600' : ''}">
+          <div onclick="selectConversation(${conv.id}, 'ACCEPTED')" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition ${isSelected ? 'bg-indigo-50/70 border-l-4 border-indigo-600' : ''}">
             <div class="flex items-center space-x-2.5 overflow-hidden">
-              <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex-shrink-0 flex items-center justify-center font-bold text-xs">
-                ${conv.contact.name.charAt(0).toUpperCase()}
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm">
+                ${conv.contact?.name ? conv.contact.name.charAt(0).toUpperCase() : '?'}
               </div>
               <div class="overflow-hidden">
-                <div class="text-xs font-bold text-slate-800 truncate">${conv.contact.name}</div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-slate-800 truncate">${conv.contact?.name || 'Contato'}</span>
+                  <span class="text-[11px] text-indigo-600 font-semibold truncate">@${conv.contact?.username || ''}</span>
+                </div>
                 <div class="text-[11px] text-slate-500 truncate">${lastMsg}</div>
               </div>
             </div>
@@ -527,27 +654,190 @@
       }).join('');
     }
 
-    async function startConversationWith(recipientUserId) {
+    function renderPendingRequests() {
+      const container = document.getElementById('requestsList');
+      if (!pendingRequests || pendingRequests.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhuma solicitação de mensagem pendente.</div>';
+        return;
+      }
+
+      container.innerHTML = pendingRequests.map(req => `
+        <div onclick="selectPendingRequest(${req.id})" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition border-l-4 border-pink-500 bg-pink-50/30">
+          <div class="flex items-center space-x-2.5 overflow-hidden">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 to-rose-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm">
+              ${req.sender?.name ? req.sender.name.charAt(0).toUpperCase() : '?'}
+            </div>
+            <div class="overflow-hidden">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-800 truncate">${req.sender?.name || 'Usuário'}</span>
+                <span class="text-[11px] text-pink-600 font-semibold truncate">@${req.sender?.username || ''}</span>
+              </div>
+              <div class="text-[11px] text-slate-600 truncate font-medium">"${req.initialMessage?.content || 'Solicitação de conversa'}"</div>
+            </div>
+          </div>
+          <span class="text-[10px] bg-pink-100 text-pink-700 font-bold px-2 py-0.5 rounded-full">Novo</span>
+        </div>
+      `).join('');
+    }
+
+    function renderContacts() {
+      const container = document.getElementById('contactsList');
+      if (!contacts || contacts.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Nenhum contato encontrado. Aceite solicitações para formar contatos!</div>';
+        return;
+      }
+
+      container.innerHTML = contacts.map(c => `
+        <div onclick="openDirectWithUsername('${c.username}')" class="p-3 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
+              ${c.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-800">${c.name}</div>
+              <div class="text-[11px] text-indigo-600 font-semibold">@${c.username}</div>
+            </div>
+          </div>
+          <button class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded font-medium hover:bg-indigo-100">
+            Conversar
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Busca de Usuários por @username
+    function handleSearch(val) {
+      const clearBtn = document.getElementById('clearSearchBtn');
+      const dropdown = document.getElementById('searchResultsDropdown');
+
+      if (!val || val.trim().length === 0) {
+        clearBtn.classList.add('hidden');
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      clearBtn.classList.remove('hidden');
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(async () => {
+        try {
+          const apiUrl = getApiUrl();
+          const res = await fetch(`${apiUrl}/api/users/search?q=${encodeURIComponent(val.trim())}`, {
+            headers: { 'Authorization': `Bearer ${currentToken}` }
+          });
+          const results = await res.json();
+          renderSearchResults(results);
+        } catch (e) {
+          console.error(e);
+        }
+      }, 250);
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
+    }
+
+    function renderSearchResults(results) {
+      const dropdown = document.getElementById('searchResultsDropdown');
+      dropdown.classList.remove('hidden');
+
+      if (!results || results.length === 0) {
+        dropdown.innerHTML = '<div class="p-4 text-center text-xs text-slate-400">Nenhum usuário encontrado</div>';
+        return;
+      }
+
+      dropdown.innerHTML = results.map(u => {
+        let actionHtml = '';
+        if (u.relationship.status === 'ACCEPTED') {
+          actionHtml = `<button onclick="selectConversation(${u.relationship.conversationId}, 'ACCEPTED')" class="text-xs bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-indigo-700">Abrir Chat</button>`;
+        } else if (u.relationship.status === 'PENDING_SENT') {
+          actionHtml = `<span class="text-[11px] text-amber-600 bg-amber-50 px-2 py-1 rounded-lg font-medium border border-amber-200">Enviado ⏳</span>`;
+        } else if (u.relationship.status === 'PENDING_RECEIVED') {
+          actionHtml = `<button onclick="selectPendingRequest(${u.relationship.conversationId})" class="text-xs bg-pink-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-pink-700">Ver Pedido</button>`;
+        } else if (u.relationship.status === 'BLOCKED') {
+          actionHtml = `<span class="text-[11px] text-rose-500 bg-rose-50 px-2 py-1 rounded-lg font-medium">Bloqueado</span>`;
+        } else {
+          actionHtml = `<button onclick="openRequestModal('${u.username}', '${u.name}')" class="text-xs bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2.5 py-1 rounded-lg font-medium hover:opacity-90 shadow-sm">✉️ Solicitar</button>`;
+        }
+
+        return `
+          <div class="p-2.5 hover:bg-slate-50 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2 overflow-hidden">
+              <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                ${u.name.charAt(0).toUpperCase()}
+              </div>
+              <div class="overflow-hidden">
+                <div class="text-xs font-bold text-slate-800 truncate">${u.name}</div>
+                <div class="text-[11px] text-indigo-600 font-semibold truncate">@${u.username}</div>
+              </div>
+            </div>
+            ${actionHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal de Solicitação
+    function openRequestModal(username, name) {
+      clearSearch();
+      targetUserForRequest = { username, name };
+      document.getElementById('modalRecipientName').innerText = name;
+      document.getElementById('modalRecipientUsername').innerText = `@${username}`;
+      document.getElementById('modalRecipientAvatar').innerText = name.charAt(0).toUpperCase();
+      document.getElementById('modalMessageContent').value = '';
+      document.getElementById('requestModal').classList.remove('hidden');
+      document.getElementById('modalMessageContent').focus();
+    }
+
+    function closeRequestModal() {
+      document.getElementById('requestModal').classList.add('hidden');
+      targetUserForRequest = null;
+    }
+
+    async function submitConversationRequest() {
+      const content = document.getElementById('modalMessageContent').value.trim();
+      if (!content || !targetUserForRequest) {
+        alert('Digite uma mensagem para a solicitação.');
+        return;
+      }
+
       try {
         const apiUrl = getApiUrl();
-        const res = await fetch(`${apiUrl}/api/conversations`, {
+        const payload = {
+          recipientUsername: targetUserForRequest.username,
+          content: content,
+          tempId: 'req_' + Date.now()
+        };
+
+        logEvent('OUT', 'POST_CONVERSATION_REQUEST', payload);
+        const res = await fetch(`${apiUrl}/api/conversations/request`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${currentToken}`
           },
-          body: JSON.stringify({ recipientUserId })
+          body: JSON.stringify(payload)
         });
-        const conv = await res.json();
-        await loadConversations();
-        switchTab('conversations');
-        selectConversation(conv.id);
-      } catch (e) {
-        alert('Erro ao iniciar conversa: ' + e.message);
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Erro: ' + (data.message || JSON.stringify(data)));
+          return;
+        }
+
+        closeRequestModal();
+        logEvent('IN', 'REQUEST_SENT_SUCCESS', data);
+        alert(`Solicitação enviada com sucesso para @${targetUserForRequest.username}!`);
+        await loadUserData();
+      } catch (err) {
+        alert('Erro ao enviar solicitação: ' + err.message);
       }
     }
 
-    async function selectConversation(conversationId) {
+    // Seleção de Conversa / Solicitação
+    async function selectConversation(conversationId, status = 'ACCEPTED') {
+      clearSearch();
       if (currentConversation) {
         leaveRoom(currentConversation.id);
       }
@@ -560,25 +850,151 @@
 
       if (!currentConversation) return;
 
-      // Atualiza Header
-      document.getElementById('chatContactAvatar').innerText = currentConversation.contact.name.charAt(0).toUpperCase();
-      document.getElementById('chatContactName').innerText = currentConversation.contact.name;
-      document.getElementById('chatStatusText').innerText = currentConversation.contact.email;
-      document.getElementById('roomBadge').classList.remove('hidden');
-      document.getElementById('currentRoomId').innerText = currentConversation.id;
+      currentConversation.status = status;
+      updateChatHeader(currentConversation.contact, status, currentConversation.id);
+      setupChatMode(status);
 
-      // Habilita input
-      document.getElementById('messageInput').disabled = false;
-      document.getElementById('messageInput').placeholder = `Enviar mensagem para ${currentConversation.contact.name}...`;
-      document.getElementById('sendBtn').disabled = false;
-      document.getElementById('messageInput').focus();
-
-      // Entrar na sala socket
       joinRoom(currentConversation.id);
-
-      // Carregar histórico de mensagens
       await loadMessages(currentConversation.id);
       renderConversations();
+    }
+
+    async function selectPendingRequest(conversationId) {
+      clearSearch();
+      if (currentConversation) {
+        leaveRoom(currentConversation.id);
+      }
+
+      const req = pendingRequests.find(r => r.id === conversationId);
+      if (!req) return;
+
+      currentConversation = {
+        id: req.id,
+        status: 'PENDING',
+        contact: req.sender
+      };
+
+      updateChatHeader(req.sender, 'PENDING', req.id);
+      setupChatMode('PENDING');
+
+      const senderUsername = req.sender?.username ? `@${req.sender.username}` : '@usuario';
+      document.getElementById('bannerSenderName').innerText = senderUsername;
+
+      joinRoom(req.id);
+      await loadMessages(req.id);
+    }
+
+    async function openDirectWithUsername(username) {
+      if (!username) return;
+      try {
+        const cleanUser = username.replace(/^@/, '');
+        const apiUrl = getApiUrl();
+        const res = await fetch(`${apiUrl}/api/users/by-username/${encodeURIComponent(cleanUser)}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const user = await res.json();
+        if (user.relationship?.status === 'ACCEPTED' && user.relationship.conversationId) {
+          selectConversation(user.relationship.conversationId, 'ACCEPTED');
+        } else {
+          openRequestModal(user.username || cleanUser, user.name || cleanUser);
+        }
+      } catch (e) {
+        console.error('Erro ao abrir direto com username:', e);
+      }
+    }
+
+    function updateChatHeader(contact, status, conversationId) {
+      document.getElementById('chatContactAvatar').innerText = contact?.name ? contact.name.charAt(0).toUpperCase() : '?';
+      document.getElementById('chatContactName').innerText = contact?.name || 'Contato';
+      document.getElementById('chatContactUsername').innerText = contact?.username ? `@${contact.username}` : '';
+      document.getElementById('chatStatusText').innerText = contact?.email || '';
+      document.getElementById('roomBadge').classList.remove('hidden');
+      document.getElementById('currentRoomId').innerText = conversationId;
+    }
+
+    function setupChatMode(status) {
+      const banner = document.getElementById('requestActionBanner');
+      const badge = document.getElementById('requestStatusBadge');
+      const input = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+
+      badge.classList.remove('hidden');
+
+      if (status === 'PENDING') {
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-pink-100 text-pink-700 border border-pink-200';
+        badge.innerText = 'Solicitação Pendente';
+        banner.classList.remove('hidden');
+        input.disabled = true;
+        input.placeholder = 'Aceite a solicitação para responder...';
+        sendBtn.disabled = true;
+      } else if (status === 'REJECTED') {
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700';
+        badge.innerText = 'Conversa Recusada';
+        banner.classList.add('hidden');
+        input.disabled = true;
+        input.placeholder = 'Esta conversa foi recusada.';
+        sendBtn.disabled = true;
+      } else {
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200';
+        badge.innerText = 'Conversa Ativa';
+        banner.classList.add('hidden');
+        input.disabled = false;
+        input.placeholder = `Enviar mensagem...`;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    async function acceptCurrentRequest() {
+      if (!currentConversation) return;
+      try {
+        const apiUrl = getApiUrl();
+        logEvent('OUT', 'ACCEPT_REQUEST', { conversationId: currentConversation.id });
+        const res = await fetch(`${apiUrl}/api/conversations/${currentConversation.id}/accept`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        logEvent('IN', 'ACCEPT_SUCCESS', data);
+        setupChatMode('ACCEPTED');
+        await loadUserData();
+      } catch (e) {
+        alert('Erro ao aceitar solicitação: ' + e.message);
+      }
+    }
+
+    async function rejectCurrentRequest() {
+      if (!currentConversation) return;
+      try {
+        const apiUrl = getApiUrl();
+        logEvent('OUT', 'REJECT_REQUEST', { conversationId: currentConversation.id });
+        await fetch(`${apiUrl}/api/conversations/${currentConversation.id}/reject`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        setupChatMode('REJECTED');
+        await loadUserData();
+      } catch (e) {
+        alert('Erro ao recusar: ' + e.message);
+      }
+    }
+
+    async function blockCurrentContact() {
+      if (!currentConversation || !currentConversation.contact) return;
+      const targetName = currentConversation.contact?.username ? `@${currentConversation.contact.username}` : (currentConversation.contact?.name || 'este usuário');
+      if (!confirm(`Deseja realmente bloquear ${targetName}?`)) return;
+
+      try {
+        const apiUrl = getApiUrl();
+        await fetch(`${apiUrl}/api/users/${currentConversation.contact.id}/block`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        alert('Usuário bloqueado com sucesso.');
+        logout();
+      } catch (e) {
+        alert('Erro ao bloquear: ' + e.message);
+      }
     }
 
     async function loadMessages(conversationId) {
@@ -593,7 +1009,7 @@
         container.innerHTML = '';
         
         if (msgs.length === 0) {
-          container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8">Nenhuma mensagem ainda. Diga um "Olá"!</div>';
+          container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8">Nenhuma mensagem ainda.</div>';
           return;
         }
 
@@ -607,7 +1023,6 @@
     function appendMessageUI(msg, autoScroll = true) {
       const container = document.getElementById('messagesContainer');
       
-      // Remove mensagem de "nenhuma mensagem" se existir
       if (container.children.length === 1 && container.children[0].innerText.includes('Nenhuma mensagem')) {
         container.innerHTML = '';
       }
@@ -615,10 +1030,9 @@
       const isMe = msg.senderId === currentUser.id;
       const time = new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      // Ícone de status
       let statusIcon = '';
       if (isMe) {
-        if (msg.status === 'READ') statusIcon = '<span id="status-icon-'+msg.id+'" class="text-indigo-600 font-bold ml-1" title="Lida">✓✓</span>';
+        if (msg.status === 'READ') statusIcon = '<span id="status-icon-'+msg.id+'" class="text-indigo-600 font-bold ml-1" title="Lida/Visualizada">✓✓</span>';
         else if (msg.status === 'DELIVERED') statusIcon = '<span id="status-icon-'+msg.id+'" class="text-slate-400 ml-1" title="Entregue">✓✓</span>';
         else statusIcon = '<span id="status-icon-'+msg.id+'" class="text-slate-400 ml-1" title="Enviada">✓</span>';
       }
@@ -626,9 +1040,9 @@
       const div = document.createElement('div');
       div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} w-full`;
       div.innerHTML = `
-        <div class="max-w-[75%] rounded-2xl px-3.5 py-2 shadow-sm ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'}">
+        <div class="max-w-[75%] rounded-2xl px-3.5 py-2 shadow-sm ${isMe ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'}">
           <div class="text-xs leading-relaxed break-words">${escapeHtml(msg.content)}</div>
-          <div class="text-[10px] mt-1 flex items-center justify-end ${isMe ? 'text-indigo-200' : 'text-slate-400'}">
+          <div class="text-[10px] mt-1 flex items-center justify-end ${isMe ? 'text-indigo-100' : 'text-slate-400'}">
             <span>${time}</span>
             ${statusIcon}
           </div>
@@ -647,7 +1061,7 @@
         if (status === 'READ') {
           el.className = 'text-indigo-600 font-bold ml-1';
           el.innerText = '✓✓';
-          el.title = 'Lida';
+          el.title = 'Lida/Visualizada';
         } else if (status === 'DELIVERED') {
           el.className = 'text-slate-400 ml-1';
           el.innerText = '✓✓';
@@ -688,7 +1102,6 @@
         type: 'TEXT'
       };
 
-      // Preferência: Envio via WebSocket (se conectado) ou HTTP
       if (socket && socket.connected) {
         logEvent('OUT', 'send_message', payload);
         socket.emit('send_message', payload);
@@ -739,7 +1152,7 @@
     function showTypingIndicator(isTyping) {
       const el = document.getElementById('typingIndicator');
       if (isTyping) {
-        document.getElementById('typingUserName').innerText = `${currentConversation.contact.name} está digitando...`;
+        document.getElementById('typingUserName').innerText = `${currentConversation.contact?.name || 'Usuário'} está digitando...`;
         el.classList.remove('hidden');
       } else {
         el.classList.add('hidden');
@@ -748,20 +1161,30 @@
 
     function switchTab(tab) {
       const convList = document.getElementById('conversationsList');
+      const reqList = document.getElementById('requestsList');
       const contList = document.getElementById('contactsList');
+      
       const convBtn = document.getElementById('tabConversationsBtn');
+      const reqBtn = document.getElementById('tabRequestsBtn');
       const contBtn = document.getElementById('tabContactsBtn');
+
+      convList.classList.add('hidden');
+      reqList.classList.add('hidden');
+      contList.classList.add('hidden');
+
+      convBtn.className = 'flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center transition';
+      reqBtn.className = 'flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center transition flex items-center justify-center gap-1';
+      contBtn.className = 'flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center transition';
 
       if (tab === 'conversations') {
         convList.classList.remove('hidden');
-        contList.classList.add('hidden');
-        convBtn.className = 'flex-1 py-2 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center';
-        contBtn.className = 'flex-1 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center';
+        convBtn.className = 'flex-1 py-2.5 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center transition';
+      } else if (tab === 'requests') {
+        reqList.classList.remove('hidden');
+        reqBtn.className = 'flex-1 py-2.5 text-xs font-bold text-pink-600 border-b-2 border-pink-600 text-center transition flex items-center justify-center gap-1';
       } else {
-        convList.classList.add('hidden');
         contList.classList.remove('hidden');
-        contBtn.className = 'flex-1 py-2 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center';
-        convBtn.className = 'flex-1 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center';
+        contBtn.className = 'flex-1 py-2.5 text-xs font-bold text-indigo-600 border-b-2 border-indigo-600 text-center transition';
       }
     }
 

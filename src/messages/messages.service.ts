@@ -102,6 +102,19 @@ export class MessagesService {
       throw new NotFoundException('Conversa não encontrada');
     }
 
+    if (conversation.status === 'REJECTED') {
+      throw new ForbiddenException('Esta conversa foi recusada');
+    }
+
+    if (
+      conversation.status === 'PENDING' &&
+      conversation.initiatedById !== senderId
+    ) {
+      throw new ForbiddenException(
+        'Você precisa aceitar a solicitação antes de enviar mensagens',
+      );
+    }
+
     const senderParticipant = conversation.participants.find(
       (p) => p.userId === senderId,
     );
@@ -109,6 +122,28 @@ export class MessagesService {
     if (!senderParticipant) {
       throw new ForbiddenException('Você não participa desta conversa');
     }
+
+    // Verificar se algum participante bloqueou o remetente
+    const otherParticipant = conversation.participants.find(
+      (p) => p.userId !== senderId,
+    );
+    if (otherParticipant) {
+      const isBlocked = await this.prisma.blockedUser.findFirst({
+        where: {
+          OR: [
+            { userId: senderId, blockedId: otherParticipant.userId },
+            { userId: otherParticipant.userId, blockedId: senderId },
+          ],
+        },
+      });
+
+      if (isBlocked) {
+        throw new ForbiddenException(
+          'Não é possível enviar mensagem para este usuário',
+        );
+      }
+    }
+
 
     const createdMessage = await this.prisma.message.create({
       data: {

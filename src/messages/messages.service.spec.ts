@@ -18,6 +18,9 @@ describe('MessagesService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    blockedUser: {
+      findFirst: jest.fn(),
+    },
     message: {
       findMany: jest.fn(),
       create: jest.fn(),
@@ -84,11 +87,14 @@ describe('MessagesService', () => {
   it('deve enviar mensagem, emitir WebSocket e disparar Push FCM se destinatário estiver offline', async () => {
     mockPrismaService.conversation.findUnique.mockResolvedValue({
       id: 10,
+      status: 'ACCEPTED',
       participants: [
         { userId: 1, user: { id: 1, name: 'Carlos', fcmToken: null } },
         { userId: 2, user: { id: 2, name: 'Mariana', fcmToken: 'fcm_token_mariana' } },
       ],
     });
+    mockPrismaService.blockedUser.findFirst.mockResolvedValue(null);
+
 
     const createdMsg = {
       id: 100,

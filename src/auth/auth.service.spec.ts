@@ -40,12 +40,14 @@ describe('AuthService', () => {
     mockPrismaService.user.findUnique.mockResolvedValue(null);
     mockPrismaService.user.create.mockResolvedValue({
       id: 1,
+      username: 'carlos_silva',
       name: 'Carlos Silva',
       email: 'carlos@example.com',
       avatarUrl: null,
     });
 
     const result = await service.register({
+      username: 'carlos_silva',
       name: 'Carlos Silva',
       email: 'carlos@example.com',
       password: 'password123',
@@ -54,17 +56,19 @@ describe('AuthService', () => {
     expect(result).toHaveProperty('token', 'mock_jwt_token');
     expect(result.user).toEqual({
       id: 1,
+      username: 'carlos_silva',
       name: 'Carlos Silva',
       email: 'carlos@example.com',
       avatarUrl: null,
     });
   });
 
-  it('deve lançar ConflictException ao tentar registrar email duplicado', async () => {
+  it('deve lançar ConflictException ao tentar registrar email ou username duplicado', async () => {
     mockPrismaService.user.findUnique.mockResolvedValue({ id: 1, email: 'carlos@example.com' });
 
     await expect(
       service.register({
+        username: 'carlos_silva',
         name: 'Carlos Silva',
         email: 'carlos@example.com',
         password: 'password123',
@@ -76,6 +80,7 @@ describe('AuthService', () => {
     const hashedPassword = await bcrypt.hash('password123', 10);
     mockPrismaService.user.findUnique.mockResolvedValue({
       id: 1,
+      username: 'carlos_silva',
       name: 'Carlos Silva',
       email: 'carlos@example.com',
       passwordHash: hashedPassword,
@@ -89,12 +94,14 @@ describe('AuthService', () => {
 
     expect(result).toHaveProperty('token', 'mock_jwt_token');
     expect(result.user.email).toBe('carlos@example.com');
+    expect(result.user.username).toBe('carlos_silva');
   });
 
   it('deve lançar UnauthorizedException com senha incorreta', async () => {
     const hashedPassword = await bcrypt.hash('password123', 10);
     mockPrismaService.user.findUnique.mockResolvedValue({
       id: 1,
+      username: 'carlos_silva',
       name: 'Carlos Silva',
       email: 'carlos@example.com',
       passwordHash: hashedPassword,
@@ -108,4 +115,5 @@ describe('AuthService', () => {
       }),
     ).rejects.toThrow(UnauthorizedException);
   });
+
 });

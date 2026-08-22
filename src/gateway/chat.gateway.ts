@@ -73,6 +73,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const userId = Number(payload.sub);
       client.data.user = { id: userId, email: payload.email };
 
+      // Verificar se o usuário ainda existe no banco de dados
+      const user = await this.usersService.findById(userId).catch(() => null);
+      if (!user) {
+        this.logger.warn(`Conexão rejeitada para socket ${client.id}: Usuário ${userId} não existe no banco`);
+        client.disconnect();
+        return;
+      }
+
+      // Entrar na sala pessoal do usuário para notificações diretas
+      client.join(`user_${userId}`);
+
       // Registrar socket
       if (!this.userSockets.has(userId)) {
         this.userSockets.set(userId, new Set());
@@ -81,7 +92,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.socketUsers.set(client.id, userId);
 
       await this.usersService.updateLastSeen(userId);
-      this.logger.log(`Usuário ${userId} conectado no socket ${client.id}`);
+      this.logger.log(`Usuário ${userId} (@${user.username}) conectado no socket ${client.id}`);
     } catch (error) {
       this.logger.warn(`Erro na autenticação do socket ${client.id}: ${error.message}`);
       client.disconnect();
@@ -89,25 +100,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket) {
-    const userId = this.socketUsers.get(client.id);
-    if (userId) {
-      const userSocketsSet = this.userSockets.get(userId);
-      if (userSocketsSet) {
-        userSocketsSet.delete(client.id);
-        if (userSocketsSet.size === 0) {
-          this.userSockets.delete(userId);
-          await this.usersService.updateLastSeen(userId);
+    try {
+      const userId = this.socketUsers.get(client.id);
+      if (userId) {
+        const userSocketsSet = this.userSockets.get(userId);
+        if (userSocketsSet) {
+          userSocketsSet.delete(client.id);
+          if (userSocketsSet.size === 0) {
+            this.userSockets.delete(userId);
+            await this.usersService.updateLastSeen(userId);
+          }
         }
-      }
-      this.socketUsers.delete(client.id);
+        this.socketUsers.delete(client.id);
 
-      // Limpar das salas
-      for (const [room, users] of this.roomUsers.entries()) {
-        if (!this.isUserConnectedToRoom(userId, room)) {
-          users.delete(userId);
+        // Limpar das salas
+        for (const [room, users] of this.roomUsers.entries()) {
+          if (!this.isUserConnectedToRoom(userId, room)) {
+            users.delete(userId);
+          }
         }
+        this.logger.log(`Usuário ${userId} desconectou o socket ${client.id}`);
       }
-      this.logger.log(`Usuário ${userId} desconectou o socket ${client.id}`);
+    } catch (error) {
+      this.logger.warn(`Erro ao processar desconexão do socket ${client.id}: ${error.message}`);
     }
   }
 
@@ -202,7 +217,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  // Métodos auxiliares para disparo de eventos pelo MessagesService
+  // Métodos auxiliares para disparo de eventos pelo MessagesService e ConversationsService
+
+  emitToUser(userId: number, event: string, payload: any) {
+    const roomName = `user_${userId}`;
+    this.server?.to(roomName).emit(event, payload);
+  }
+
+  broadcastNewMessageRequest(recipientId: number, data: any) {
+    this.emitToUser(recipientId, 'new_message_request', data);
+  }
+
+  broadcastConversationAccepted(
+    conversationId: number,
+    initiatorId: number,
+    data: any,
+  ) {
+    this.emitToUser(initiatorId, 'conversation_accepted', data);
+    const roomName = `conversation_${conversationId}`;
+    this.server?.to(roomName).emit('conversation_accepted', data);
+  }
+
+  broadcastConversationRejected(
+    conversationId: number,
+    initiatorId: number,
+    data: any,
+  ) {
+    this.emitToUser(initiatorId, 'conversation_rejected', data);
+    const roomName = `conversation_${conversationId}`;
+    this.server?.to(roomName).emit('conversation_rejected', data);
+  }
 
   broadcastNewMessage(conversationId: number, message: any) {
     const roomName = `conversation_${conversationId}`;
@@ -239,3 +283,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return false;
   }
 }
+

@@ -17,11 +17,22 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
+    const username = dto.username.toLowerCase().trim();
+    const email = dto.email.toLowerCase().trim();
+
+    const existingUsername = await this.prisma.user.findUnique({
+      where: { username },
     });
 
-    if (existingUser) {
+    if (existingUsername) {
+      throw new ConflictException('Username já em uso');
+    }
+
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingEmail) {
       throw new ConflictException('Email já cadastrado');
     }
 
@@ -29,13 +40,15 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        username,
         name: dto.name.trim(),
-        email: dto.email.toLowerCase().trim(),
+        email,
         passwordHash,
         avatarUrl: dto.avatarUrl || null,
       },
       select: {
         id: true,
+        username: true,
         name: true,
         email: true,
         avatarUrl: true,
@@ -71,6 +84,7 @@ export class AuthService {
       token,
       user: {
         id: user.id,
+        username: user.username,
         name: user.name,
         email: user.email,
         avatarUrl: user.avatarUrl,
