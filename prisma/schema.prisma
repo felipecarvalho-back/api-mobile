@@ -1,10 +1,16 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
 }
 
 enum MessageType {
@@ -32,7 +38,7 @@ model User {
   email        String    @unique
   passwordHash String
   avatarUrl    String?
-  fcmToken     String?   // Token do dispositivo para notificações push
+  fcmToken     String? // Token do dispositivo para notificações push
   lastSeenAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -63,14 +69,14 @@ model Conversation {
 }
 
 model ConversationParticipant {
-  id             Int          @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   conversationId Int
   userId         Int
   lastReadAt     DateTime?
-  joinedAt       DateTime     @default(now())
+  joinedAt       DateTime  @default(now())
 
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId])
   @@map("conversation_participants")
@@ -78,12 +84,12 @@ model ConversationParticipant {
 
 model BlockedUser {
   id        Int      @id @default(autoincrement())
-  userId    Int      // Quem bloqueou
-  blockedId Int      // Quem foi bloqueado
+  userId    Int // Quem bloqueou
+  blockedId Int // Quem foi bloqueado
   createdAt DateTime @default(now())
 
-  user      User     @relation("UserBlocks", fields: [userId], references: [id], onDelete: Cascade)
-  blocked   User     @relation("BlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
+  user    User @relation("UserBlocks", fields: [userId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blockedId])
   @@map("blocked_users")
@@ -91,7 +97,7 @@ model BlockedUser {
 
 model Message {
   id             Int           @id @default(autoincrement())
-  tempId         String?       // ID temporário gerado no cliente mobile para envio otimista
+  tempId         String? // ID temporário gerado no cliente mobile para envio otimista
   conversationId Int
   senderId       Int
   content        String
@@ -100,10 +106,9 @@ model Message {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender         User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
   @@map("messages")
 }
-

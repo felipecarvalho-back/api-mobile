@@ -5,7 +5,7 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import { MessageStatus, MessageType } from '@prisma/client';
+import { MessageStatus, MessageType } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatGateway } from '../gateway/chat.gateway';

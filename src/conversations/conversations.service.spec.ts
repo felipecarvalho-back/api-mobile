@@ -121,7 +121,7 @@ describe('ConversationsService', () => {
     expect(result.conversationId).toBe(15);
     expect(result.status).toBe('PENDING');
     expect(result.recipient.username).toBe('mariana_dev');
-    expect(result.message.content).toBe('Olá Mariana!');
+    expect(result.message?.content).toBe('Olá Mariana!');
     expect(mockChatGateway.broadcastNewMessageRequest).toHaveBeenCalledWith(2, expect.objectContaining({ conversationId: 15 }));
   });
 

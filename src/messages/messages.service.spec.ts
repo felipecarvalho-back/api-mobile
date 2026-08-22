@@ -3,7 +3,7 @@ import { MessagesService } from './messages.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../gateway/chat.gateway';
 import { FcmService } from '../notifications/fcm.service';
-import { MessageStatus, MessageType } from '@prisma/client';
+import { MessageStatus, MessageType } from '../generated/prisma/client';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('MessagesService', () => {

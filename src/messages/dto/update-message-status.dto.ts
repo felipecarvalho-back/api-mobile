@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { MessageStatus } from '@prisma/client';
+import { MessageStatus } from '../../generated/prisma/client';
 
 export class UpdateMessageStatusDto {
   @IsNotEmpty({ message: 'status é obrigatório' })

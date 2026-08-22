@@ -3,6 +3,11 @@
 /node_modules
 /build
 
+.agents
+.claude
+.windsurf
+generated
+
 # Logs
 logs
 *.log
@@ -54,3 +59,5 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+/generated/prisma

@@ -6,7 +6,7 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import { ConversationStatus, MessageStatus, MessageType } from '@prisma/client';
+import { ConversationStatus, MessageStatus, MessageType } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateConversationRequestDto } from './dto/create-conversation-request.dto';
 import { ChatGateway } from '../gateway/chat.gateway';
