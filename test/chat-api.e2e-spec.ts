@@ -99,19 +99,7 @@ describe('Chat API Full Integration Flow (e2e)', () => {
     expect(response.body.user.email).toBe('carlos@example.com');
   });
 
-  it('4. POST /api/users/fcm-token - Atualizar token FCM', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/api/users/fcm-token')
-      .set('Authorization', `Bearer ${user1Token}`)
-      .send({
-        fcmToken: 'fcm_token_device_carlos',
-      })
-      .expect(200);
-
-    expect(response.body).toEqual({ success: true });
-  });
-
-  it('5. GET /api/users/contacts - Listar contatos', async () => {
+  it('4. GET /api/users/contacts - Listar contatos', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/users/contacts')
       .set('Authorization', `Bearer ${user1Token}`)

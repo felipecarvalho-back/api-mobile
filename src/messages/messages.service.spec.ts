@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessagesService } from './messages.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../gateway/chat.gateway';
-import { FcmService } from '../notifications/fcm.service';
 import { MessageStatus, MessageType } from '../generated/prisma/client';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
@@ -37,17 +36,12 @@ describe('MessagesService', () => {
     isUserActiveInRoom: jest.fn(),
   };
 
-  const mockFcmService = {
-    sendPushNotification: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MessagesService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ChatGateway, useValue: mockChatGateway },
-        { provide: FcmService, useValue: mockFcmService },
       ],
     }).compile();
 
@@ -89,17 +83,16 @@ describe('MessagesService', () => {
     await expect(service.getMessages(10, 99)).rejects.toThrow(ForbiddenException);
   });
 
-  it('deve enviar mensagem, emitir WebSocket e disparar Push FCM se destinatário estiver offline', async () => {
+  it('deve enviar mensagem e emitir WebSocket para a sala da conversa', async () => {
     mockPrismaService.conversation.findUnique.mockResolvedValue({
       id: 10,
       status: 'ACCEPTED',
       participants: [
-        { userId: 1, user: { id: 1, name: 'Carlos', fcmToken: null } },
-        { userId: 2, user: { id: 2, name: 'Mariana', fcmToken: 'fcm_token_mariana' } },
+        { userId: 1, user: { id: 1, name: 'Carlos' } },
+        { userId: 2, user: { id: 2, name: 'Mariana' } },
       ],
     });
     mockPrismaService.blockedUser.findFirst.mockResolvedValue(null);
-
 
     const createdMsg = {
       id: 100,
@@ -113,7 +106,6 @@ describe('MessagesService', () => {
     };
     mockPrismaService.message.create.mockResolvedValue(createdMsg);
     mockPrismaService.conversation.update.mockResolvedValue({});
-    mockChatGateway.isUserActiveInRoom.mockReturnValue(false); // Mariana offline
 
     const result = await service.sendMessage(10, 1, {
       tempId: 'tmp_100',
@@ -122,14 +114,6 @@ describe('MessagesService', () => {
 
     expect(result.id).toBe(100);
     expect(mockChatGateway.broadcastNewMessage).toHaveBeenCalledWith(10, expect.objectContaining({ id: 100 }));
-    expect(mockFcmService.sendPushNotification).toHaveBeenCalledWith('fcm_token_mariana', {
-      title: 'Carlos',
-      body: 'Mensagem de teste',
-      data: {
-        conversationId: '10',
-        messageId: '100',
-      },
-    });
   });
 
   it('deve atualizar status da mensagem e emitir evento no WebSocket', async () => {

@@ -10,7 +10,6 @@ API REST e Gateway WebSockets para aplicativo mobile de chat em tempo real (Nati
 - **Banco de Dados & ORM:** Prisma ORM com SQLite (`dev.db`)
 - **Autenticação:** JWT (`@nestjs/jwt`, `@nestjs/passport`, `passport-jwt`, `bcryptjs`)
 - **WebSockets / Tempo Real:** Socket.IO (`@nestjs/websockets`, `@nestjs/platform-socket.io`, `socket.io`)
-- **Push Notifications:** Firebase Cloud Messaging (`firebase-admin`)
 - **Validação:** `class-validator` + `class-transformer`
 
 ---
@@ -68,7 +67,6 @@ Prefixo global: `/api`
 
 ### Usuários & Contatos (Exige `Authorization: Bearer <token>`)
 - `GET /api/users/contacts` - Lista contatos disponíveis
-- `POST /api/users/fcm-token` - Registra token FCM do dispositivo (`fcmToken`)
 
 ### Conversas (Exige `Authorization: Bearer <token>`)
 - `GET /api/conversations` - Lista conversas com última mensagem e contador de não lidas

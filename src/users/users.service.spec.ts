@@ -111,23 +111,5 @@ describe('UsersService', () => {
     expect(result).toEqual({ success: true, message: 'Usuário bloqueado com sucesso' });
     expect(mockPrismaService.blockedUser.upsert).toHaveBeenCalled();
   });
-
-  it('deve atualizar o FCM token com sucesso', async () => {
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 1 });
-    mockPrismaService.user.update.mockResolvedValue({ id: 1, fcmToken: 'new_token' });
-
-    const result = await service.updateFcmToken(1, 'new_token');
-    expect(result).toEqual({ success: true });
-    expect(mockPrismaService.user.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: { fcmToken: 'new_token' },
-    });
-  });
-
-  it('deve lançar NotFoundException ao atualizar FCM token de usuário inexistente', async () => {
-    mockPrismaService.user.findUnique.mockResolvedValue(null);
-
-    await expect(service.updateFcmToken(999, 'token')).rejects.toThrow(NotFoundException);
-  });
 });
 

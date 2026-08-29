@@ -10,7 +10,6 @@ import { ConversationStatus, MessageStatus, MessageType } from '../generated/pri
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateConversationRequestDto } from './dto/create-conversation-request.dto';
 import { ChatGateway } from '../gateway/chat.gateway';
-import { FcmService } from '../notifications/fcm.service';
 
 @Injectable()
 export class ConversationsService {
@@ -18,7 +17,6 @@ export class ConversationsService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => ChatGateway))
     private readonly chatGateway: ChatGateway,
-    private readonly fcmService: FcmService,
   ) {}
 
   async createConversationRequest(
@@ -52,7 +50,6 @@ export class ConversationsService {
         name: true,
         email: true,
         avatarUrl: true,
-        fcmToken: true,
       },
     });
 
@@ -199,18 +196,6 @@ export class ConversationsService {
       },
       message: responseData.message,
     });
-
-    // Enviar push notification se o destinatário tiver token FCM
-    if (recipient.fcmToken) {
-      this.fcmService.sendPushNotification(recipient.fcmToken, {
-        title: `@${sender.username}`,
-        body: dto.content,
-        data: {
-          conversationId: String(conversation.id),
-          type: 'NEW_REQUEST',
-        },
-      });
-    }
 
     return responseData;
   }

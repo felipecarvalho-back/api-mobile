@@ -250,23 +250,6 @@ export class UsersService {
     return contacts;
   }
 
-  async updateFcmToken(userId: number, fcmToken: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { fcmToken },
-    });
-
-    return { success: true };
-  }
-
   async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -276,7 +259,6 @@ export class UsersService {
         name: true,
         email: true,
         avatarUrl: true,
-        fcmToken: true,
         lastSeenAt: true,
       },
     });

@@ -9,7 +9,6 @@ import { MessageStatus, MessageType } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatGateway } from '../gateway/chat.gateway';
-import { FcmService } from '../notifications/fcm.service';
 
 @Injectable()
 export class MessagesService {
@@ -17,7 +16,6 @@ export class MessagesService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => ChatGateway))
     private readonly chatGateway: ChatGateway,
-    private readonly fcmService: FcmService,
   ) {}
 
   async getMessages(
@@ -106,7 +104,6 @@ export class MessagesService {
               select: {
                 id: true,
                 name: true,
-                fcmToken: true,
               },
             },
           },
@@ -191,28 +188,6 @@ export class MessagesService {
 
     // Emitir via WebSocket para a sala
     this.chatGateway.broadcastNewMessage(conversationId, messageResponse);
-
-    // Processar notificações push para destinatários offline
-    const sender = senderParticipant.user;
-    for (const participant of conversation.participants) {
-      if (participant.userId === senderId) continue;
-
-      const isOnlineInRoom = this.chatGateway.isUserActiveInRoom(
-        conversationId,
-        participant.userId,
-      );
-
-      if (!isOnlineInRoom && participant.user.fcmToken) {
-        this.fcmService.sendPushNotification(participant.user.fcmToken, {
-          title: sender.name,
-          body: createdMessage.content,
-          data: {
-            conversationId: String(conversationId),
-            messageId: String(createdMessage.id),
-          },
-        });
-      }
-    }
 
     return messageResponse;
   }

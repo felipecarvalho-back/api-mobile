@@ -6,7 +6,6 @@ import { UsersModule } from './users/users.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/messages.module';
 import { GatewayModule } from './gateway/gateway.module';
-import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { NotificationsModule } from './notifications/notifications.module';
       isGlobal: true,
     }),
     PrismaModule,
-    NotificationsModule,
     AuthModule,
     UsersModule,
     ConversationsModule,

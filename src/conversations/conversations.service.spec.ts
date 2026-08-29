@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConversationsService } from './conversations.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatGateway } from '../gateway/chat.gateway';
-import { FcmService } from '../notifications/fcm.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('ConversationsService', () => {
@@ -39,17 +38,12 @@ describe('ConversationsService', () => {
     broadcastMessagesRead: jest.fn(),
   };
 
-  const mockFcmService = {
-    sendPushNotification: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ConversationsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ChatGateway, useValue: mockChatGateway },
-        { provide: FcmService, useValue: mockFcmService },
       ],
     }).compile();
 
@@ -96,7 +90,7 @@ describe('ConversationsService', () => {
   it('deve criar solicitação de conversa com mensagem inicial', async () => {
     mockPrismaService.user.findUnique
       .mockResolvedValueOnce({ id: 1, username: 'carlos_dev', name: 'Carlos', avatarUrl: null })
-      .mockResolvedValueOnce({ id: 2, username: 'mariana_dev', name: 'Mariana', email: 'm@ex.com', avatarUrl: null, fcmToken: null });
+      .mockResolvedValueOnce({ id: 2, username: 'mariana_dev', name: 'Mariana', email: 'm@ex.com', avatarUrl: null });
     mockPrismaService.blockedUser.findFirst.mockResolvedValue(null);
     mockPrismaService.conversation.findFirst.mockResolvedValue(null);
     mockPrismaService.conversation.create.mockResolvedValue({

@@ -30,7 +30,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         name: true,
         email: true,
         avatarUrl: true,
-        fcmToken: true,
         lastSeenAt: true,
       },
     });
