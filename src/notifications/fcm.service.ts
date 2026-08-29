@@ -19,19 +19,29 @@ export class FcmService implements OnModuleInit {
   onModuleInit() {
     const projectId = this.configService.get<string>('FIREBASE_PROJECT_ID');
     const clientEmail = this.configService.get<string>('FIREBASE_CLIENT_EMAIL');
-    let privateKey = this.configService.get<string>('FIREBASE_PRIVATE_KEY');
+    let rawPrivateKey = this.configService.get<string>('FIREBASE_PRIVATE_KEY');
 
     if (
       projectId &&
       clientEmail &&
-      privateKey &&
+      rawPrivateKey &&
       !projectId.includes('seu-projeto') &&
-      !privateKey.includes('seu_segredo')
+      !rawPrivateKey.includes('seu_segredo')
     ) {
       try {
-        if (privateKey.includes('\\n')) {
-          privateKey = privateKey.replace(/\\n/g, '\n');
+        let privateKey = rawPrivateKey.trim();
+
+        // Remove aspas externas se houver
+        if (
+          (privateKey.startsWith('"') && privateKey.endsWith('"')) ||
+          (privateKey.startsWith("'") && privateKey.endsWith("'"))
+        ) {
+          privateKey = privateKey.slice(1, -1);
         }
+
+        // Converte caracteres \n escapados para quebras de linha reais
+        privateKey = privateKey.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
+        privateKey = privateKey.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
         this.firebaseApp = initializeApp({
           credential: cert({
