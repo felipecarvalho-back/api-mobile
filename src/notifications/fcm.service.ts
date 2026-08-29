@@ -74,7 +74,7 @@ export class FcmService implements OnModuleInit {
     }
 
     try {
-      await getMessaging(this.firebaseApp).send({
+      const messageId = await getMessaging(this.firebaseApp).send({
         token: fcmToken,
         notification: {
           title: payload.title,
@@ -83,16 +83,24 @@ export class FcmService implements OnModuleInit {
         data: payload.data,
         android: {
           priority: 'high',
+          notification: {
+            sound: 'default',
+            priority: 'high',
+            channelId: 'chat_messages',
+            defaultSound: true,
+            defaultVibrateTimings: true,
+          },
         },
         apns: {
           payload: {
             aps: {
               sound: 'default',
+              badge: 1,
             },
           },
         },
       });
-      this.logger.log(`Push notification enviado com sucesso para ${fcmToken.slice(0, 15)}...`);
+      this.logger.log(`Push notification enviado com sucesso (${messageId}) para ${fcmToken.slice(0, 15)}...`);
       return true;
     } catch (error) {
       this.logger.error(`Falha ao enviar push notification: ${error.message}`);
