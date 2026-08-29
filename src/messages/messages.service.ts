@@ -52,6 +52,22 @@ export class MessagesService {
       },
     });
 
+    // Atualiza status das mensagens recebidas para READ
+    const updateResult = await this.prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        status: { not: MessageStatus.READ },
+      },
+      data: {
+        status: MessageStatus.READ,
+      },
+    });
+
+    if (updateResult.count > 0) {
+      this.chatGateway.broadcastMessagesRead(conversationId, userId);
+    }
+
     const messages = await this.prisma.message.findMany({
       where: {
         conversationId,
@@ -253,5 +269,54 @@ export class MessagesService {
     );
 
     return updated;
+  }
+
+  async markConversationAsReadDirect(conversationId: number, userId: number) {
+    const isParticipant = await this.prisma.conversationParticipant.findUnique({
+      where: {
+        conversationId_userId: {
+          conversationId,
+          userId,
+        },
+      },
+    });
+
+    if (!isParticipant) {
+      throw new ForbiddenException('Você não participa desta conversa');
+    }
+
+    const result = await this.prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        status: { not: MessageStatus.READ },
+      },
+      data: {
+        status: MessageStatus.READ,
+      },
+    });
+
+    await this.prisma.conversationParticipant.update({
+      where: {
+        conversationId_userId: {
+          conversationId,
+          userId,
+        },
+      },
+      data: {
+        lastReadAt: new Date(),
+      },
+    });
+
+    if (result.count > 0) {
+      this.chatGateway.broadcastMessagesRead(conversationId, userId);
+    }
+
+    return {
+      success: true,
+      conversationId,
+      markedCount: result.count,
+      status: 'READ',
+    };
   }
 }

@@ -21,9 +21,11 @@ describe('ConversationsService', () => {
     },
     message: {
       count: jest.fn(),
+      updateMany: jest.fn(),
     },
     conversationParticipant: {
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     blockedUser: {
       findFirst: jest.fn(),
@@ -34,6 +36,7 @@ describe('ConversationsService', () => {
     broadcastNewMessageRequest: jest.fn(),
     broadcastConversationAccepted: jest.fn(),
     broadcastConversationRejected: jest.fn(),
+    broadcastMessagesRead: jest.fn(),
   };
 
   const mockFcmService = {
@@ -186,6 +189,66 @@ describe('ConversationsService', () => {
   it('deve lançar NotFoundException se destinatário não existir', async () => {
     mockPrismaService.user.findUnique.mockResolvedValue(null);
     await expect(service.findOrCreateDirectConversation(1, 99)).rejects.toThrow(NotFoundException);
+  });
+
+  it('deve marcar conversa como lida e atualizar mensagens para READ', async () => {
+    mockPrismaService.conversation.findUnique.mockResolvedValue({
+      id: 10,
+      participants: [{ userId: 1 }, { userId: 2 }],
+    });
+    mockPrismaService.message.updateMany.mockResolvedValue({ count: 3 });
+    mockPrismaService.conversationParticipant.update.mockResolvedValue({});
+
+    const result = await service.markConversationAsRead(10, 2);
+
+    expect(result.success).toBe(true);
+    expect(result.conversationId).toBe(10);
+    expect(result.markedCount).toBe(3);
+    expect(result.status).toBe('READ');
+    expect(mockPrismaService.message.updateMany).toHaveBeenCalledWith({
+      where: {
+        conversationId: 10,
+        senderId: { not: 2 },
+        status: { not: 'READ' },
+      },
+      data: {
+        status: 'READ',
+      },
+    });
+    expect(mockPrismaService.conversationParticipant.update).toHaveBeenCalled();
+    expect(mockChatGateway.broadcastMessagesRead).toHaveBeenCalledWith(10, 2);
+  });
+
+  it('deve listar conversas do usuário com contador de mensagens não lidas', async () => {
+    mockPrismaService.conversation.findMany.mockResolvedValue([
+      {
+        id: 10,
+        isGroup: false,
+        status: 'ACCEPTED',
+        updatedAt: new Date(),
+        participants: [
+          { userId: 1, user: { id: 1, name: 'Carlos', username: 'carlos_dev' } },
+          { userId: 2, user: { id: 2, name: 'Mariana', username: 'mariana_dev' } },
+        ],
+        messages: [
+          {
+            id: 101,
+            content: 'Tudo bem?',
+            senderId: 1,
+            status: 'SENT',
+            createdAt: new Date(),
+          },
+        ],
+      },
+    ]);
+    mockPrismaService.message.count.mockResolvedValue(1);
+
+    const result = await service.getUserConversations(2);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe(10);
+    expect(result[0].unreadCount).toBe(1);
+    expect(result[0].lastMessage?.content).toBe('Tudo bem?');
   });
 });
 

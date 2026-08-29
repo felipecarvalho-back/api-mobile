@@ -201,6 +201,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
   }
 
+  @SubscribeMessage('mark_read')
+  async handleMarkRead(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { conversationId: number },
+  ) {
+    const userId = client.data.user?.id;
+    if (!userId || !data?.conversationId) return;
+
+    return this.messagesService.markConversationAsReadDirect(
+      data.conversationId,
+      userId,
+    );
+  }
+
   @SubscribeMessage('typing')
   handleTyping(
     @ConnectedSocket() client: Socket,
@@ -262,6 +276,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server?.to(roomName).emit('message_status', {
       messageId,
       status,
+    });
+  }
+
+  broadcastMessagesRead(
+    conversationId: number,
+    readerUserId: number,
+  ) {
+    const roomName = `conversation_${conversationId}`;
+    this.server?.to(roomName).emit('messages_read', {
+      conversationId,
+      readerUserId,
+      status: 'READ',
+      readAt: new Date(),
     });
   }
 

@@ -58,6 +58,14 @@ export class ConversationsController {
     return this.conversationsService.rejectConversation(conversationId, userId);
   }
 
+  @Patch(':id/read')
+  async markAsRead(
+    @CurrentUser('id') userId: number,
+    @Param('id', ParseIntPipe) conversationId: number,
+  ) {
+    return this.conversationsService.markConversationAsRead(conversationId, userId);
+  }
+
   @Post()
   async createConversation(
     @CurrentUser('id') userId: number,

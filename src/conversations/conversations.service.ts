@@ -266,9 +266,7 @@ export class ConversationsService {
           where: {
             conversationId: conv.id,
             senderId: { not: userId },
-            ...(myParticipant?.lastReadAt
-              ? { createdAt: { gt: myParticipant.lastReadAt } }
-              : { status: { not: 'READ' } }),
+            status: { not: MessageStatus.READ },
           },
         });
 
@@ -621,6 +619,62 @@ export class ConversationsService {
       },
     });
     return !!participant;
+  }
+
+  async markConversationAsRead(conversationId: number, userId: number) {
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: true,
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversa não encontrada');
+    }
+
+    const isParticipant = conversation.participants.some(
+      (p) => p.userId === userId,
+    );
+
+    if (!isParticipant) {
+      throw new ForbiddenException('Você não participa desta conversa');
+    }
+
+    // 1. Atualizar todas as mensagens da conversa onde senderId != userId e status != 'READ'
+    const result = await this.prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        status: { not: MessageStatus.READ },
+      },
+      data: {
+        status: MessageStatus.READ,
+      },
+    });
+
+    // 2. Atualizar lastReadAt do participante
+    await this.prisma.conversationParticipant.update({
+      where: {
+        conversationId_userId: {
+          conversationId,
+          userId,
+        },
+      },
+      data: {
+        lastReadAt: new Date(),
+      },
+    });
+
+    // 3. Notificar via WebSocket
+    this.chatGateway.broadcastMessagesRead(conversationId, userId);
+
+    return {
+      success: true,
+      conversationId,
+      markedCount: result.count,
+      status: 'READ',
+    };
   }
 }
 

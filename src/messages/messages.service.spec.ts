@@ -26,12 +26,14 @@ describe('MessagesService', () => {
       create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
 
   const mockChatGateway = {
     broadcastNewMessage: jest.fn(),
     broadcastMessageStatus: jest.fn(),
+    broadcastMessagesRead: jest.fn(),
     isUserActiveInRoom: jest.fn(),
   };
 
@@ -72,10 +74,13 @@ describe('MessagesService', () => {
       },
     ];
     mockPrismaService.message.findMany.mockResolvedValue(mockMessages);
+    mockPrismaService.message.updateMany.mockResolvedValue({ count: 1 });
 
     const result = await service.getMessages(10, 1);
     expect(result).toEqual(mockMessages);
     expect(mockPrismaService.conversationParticipant.update).toHaveBeenCalled();
+    expect(mockPrismaService.message.updateMany).toHaveBeenCalled();
+    expect(mockChatGateway.broadcastMessagesRead).toHaveBeenCalledWith(10, 1);
   });
 
   it('deve recusar busca de mensagens se o usuário não for participante', async () => {
@@ -143,5 +148,30 @@ describe('MessagesService', () => {
     const result = await service.updateMessageStatus(100, MessageStatus.READ, 1);
     expect(result.status).toBe(MessageStatus.READ);
     expect(mockChatGateway.broadcastMessageStatus).toHaveBeenCalledWith(10, 100, MessageStatus.READ);
+  });
+
+  it('deve marcar conversa como lida diretamente e emitir WebSocket', async () => {
+    mockPrismaService.conversationParticipant.findUnique.mockResolvedValue({
+      id: 1,
+      conversationId: 10,
+      userId: 1,
+    });
+    mockPrismaService.message.updateMany.mockResolvedValue({ count: 2 });
+    mockPrismaService.conversationParticipant.update.mockResolvedValue({});
+
+    const result = await service.markConversationAsReadDirect(10, 1);
+    expect(result.success).toBe(true);
+    expect(result.markedCount).toBe(2);
+    expect(mockPrismaService.message.updateMany).toHaveBeenCalledWith({
+      where: {
+        conversationId: 10,
+        senderId: { not: 1 },
+        status: { not: MessageStatus.READ },
+      },
+      data: {
+        status: MessageStatus.READ,
+      },
+    });
+    expect(mockChatGateway.broadcastMessagesRead).toHaveBeenCalledWith(10, 1);
   });
 });

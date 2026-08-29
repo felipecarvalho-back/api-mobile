@@ -547,6 +547,15 @@
         updateMessageStatusUI(data.messageId, data.status);
       });
 
+      // Evento: Confirmação de Leitura em Lote (Double Check Azul)
+      socket.on('messages_read', (data) => {
+        logEvent('IN', 'messages_read', data);
+        if (currentConversation && data.conversationId === currentConversation.id) {
+          markAllSentMessagesAsReadUI();
+        }
+        loadConversations();
+      });
+
       // Evento: Usuário Digitando
       socket.on('user_typing', (data) => {
         logEvent('IN', 'user_typing', data);
@@ -856,6 +865,7 @@
 
       joinRoom(currentConversation.id);
       await loadMessages(currentConversation.id);
+      await markConversationAsReadAPI(currentConversation.id);
       renderConversations();
     }
 
@@ -1067,6 +1077,33 @@
           el.innerText = '✓✓';
           el.title = 'Entregue';
         }
+      }
+    }
+
+    function markAllSentMessagesAsReadUI() {
+      const container = document.getElementById('messagesContainer');
+      if (!container) return;
+      const statusIcons = container.querySelectorAll('[id^="status-icon-"]');
+      statusIcons.forEach(el => {
+        el.className = 'text-indigo-600 font-bold ml-1';
+        el.innerText = '✓✓';
+        el.title = 'Lida/Visualizada';
+      });
+    }
+
+    async function markConversationAsReadAPI(conversationId) {
+      if (!conversationId || !currentToken) return;
+      try {
+        const apiUrl = getApiUrl();
+        await fetch(`${apiUrl}/api/conversations/${conversationId}/read`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`
+          }
+        });
+        loadConversations();
+      } catch (e) {
+        console.error('Erro ao marcar conversa como lida:', e);
       }
     }
 
